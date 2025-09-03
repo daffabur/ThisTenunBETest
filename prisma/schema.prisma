@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Province {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+
+  outfits   Outfit[]
+}
+
+model Outfit {
+  id         Int       @id @default(autoincrement())
+  name       String
+  createdAt  DateTime  @default(now())
+
+  province   Province  @relation(fields: [provinceId], references: [id])
+  provinceId Int
+
+  @@index([provinceId])
+  @@unique([name, provinceId], map: "unique_outfit_per_province")
+}
+
