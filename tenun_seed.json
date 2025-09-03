@@ -1,0 +1,167 @@
+[
+  {
+    "province": "Nanggroe Aceh Darussalam",
+    "jenisTenun": "Ulee Balang",
+    "description": "Tenun tradisional Aceh, identik dengan pakaian kebesaran kerajaan."
+  },
+  {
+    "province": "Sumatra Utara",
+    "jenisTenun": "Ulos",
+    "description": "Kain Batak yang melambangkan kasih sayang, persaudaraan, dan status sosial."
+  },
+  {
+    "province": "Sumatra Barat",
+    "jenisTenun": "Songket Pandai Sikek",
+    "description": "Songket terkenal dari Minangkabau dengan benang emas dan perak."
+  },
+  {
+    "province": "Riau",
+    "jenisTenun": "Songket Melayu Riau",
+    "description": "Kain songket bercorak flora dan geometris, melambangkan kemakmuran."
+  },
+  {
+    "province": "Kepulauan Riau",
+    "jenisTenun": "Songket Lingga",
+    "description": "Tenun khas Lingga dengan motif islami dan melayu."
+  },
+  {
+    "province": "Jambi",
+    "jenisTenun": "Batik Tenun Jambi",
+    "description": "Tenun dengan motif batik khas Jambi, berwarna cerah."
+  },
+  {
+    "province": "Sumatra Selatan",
+    "jenisTenun": "Songket Palembang",
+    "description": "Kain songket terkenal dengan motif rumit dan benang emas."
+  },
+  {
+    "province": "Bengkulu",
+    "jenisTenun": "Kain Besurek",
+    "description": "Tenun bermotif huruf Arab gundul khas Bengkulu."
+  },
+  {
+    "province": "Lampung",
+    "jenisTenun": "Tapis Lampung",
+    "description": "Kain tradisional dengan hiasan benang emas, dipakai saat upacara."
+  },
+  {
+    "province": "Banten",
+    "jenisTenun": "Baduy Tenun",
+    "description": "Tenun sederhana masyarakat Baduy dengan warna biru dan hitam."
+  },
+  {
+    "province": "DKI Jakarta",
+    "jenisTenun": "Batik Betawi Tenun",
+    "description": "Kombinasi batik dan tenun khas Betawi."
+  },
+  {
+    "province": "Jawa Barat",
+    "jenisTenun": "Tenun Garut",
+    "description": "Kain sutra Garut yang dikenal dengan motif geometris elegan."
+  },
+  {
+    "province": "Jawa Tengah",
+    "jenisTenun": "Lurik",
+    "description": "Tenun garis sederhana, melambangkan kesederhanaan dan keteguhan."
+  },
+  {
+    "province": "DI Yogyakarta",
+    "jenisTenun": "Lurik Yogya",
+    "description": "Tenun lurik dengan filosofi kehidupan Jawa."
+  },
+  {
+    "province": "Jawa Timur",
+    "jenisTenun": "Tenun Ikat Tuban",
+    "description": "Tenun ikat dengan motif pesisir, warna cerah."
+  },
+  {
+    "province": "Bali",
+    "jenisTenun": "Endek",
+    "description": "Tenun ikat khas Bali dengan motif dinamis, dipakai di upacara adat."
+  },
+  {
+    "province": "Nusa Tenggara Barat",
+    "jenisTenun": "Songket Sasak",
+    "description": "Songket khas Lombok, digunakan dalam pernikahan adat."
+  },
+  {
+    "province": "Nusa Tenggara Timur",
+    "jenisTenun": "Ikat Sumba",
+    "description": "Tenun ikat dengan warna tajam dan motif kosmologis."
+  },
+  {
+    "province": "Kalimantan Barat",
+    "jenisTenun": "Tenun Ikat Dayak",
+    "description": "Tenun bermotif alam dan spiritual, khas suku Dayak."
+  },
+  {
+    "province": "Kalimantan Tengah",
+    "jenisTenun": "Tenun Ikat Ngaju",
+    "description": "Tenun ikat dengan simbol-simbol budaya Dayak Ngaju."
+  },
+  {
+    "province": "Kalimantan Selatan",
+    "jenisTenun": "Tenun Pagatan",
+    "description": "Tenun dengan corak flora dan fauna, khas pesisir."
+  },
+  {
+    "province": "Kalimantan Timur",
+    "jenisTenun": "Tenun Ikat Samarinda",
+    "description": "Tenun ikat berbahan sutra, terkenal dengan kualitas tinggi."
+  },
+  {
+    "province": "Kalimantan Utara",
+    "jenisTenun": "Tenun Ikat Bulungan",
+    "description": "Tenun tradisional dengan motif sederhana khas Bulungan."
+  },
+  {
+    "province": "Sulawesi Utara",
+    "jenisTenun": "Tenun Minahasa",
+    "description": "Tenun dengan corak warna-warni khas Minahasa."
+  },
+  {
+    "province": "Gorontalo",
+    "jenisTenun": "Karawo",
+    "description": "Kain bordir-tenun dengan motif flora fauna, disebut juga sulaman Karawo."
+  },
+  {
+    "province": "Sulawesi Tengah",
+    "jenisTenun": "Donggala Ikat",
+    "description": "Tenun ikat khas Donggala dengan warna biru dominan."
+  },
+  {
+    "province": "Sulawesi Barat",
+    "jenisTenun": "Sekomandi",
+    "description": "Tenun ikat khas Mandar, memiliki motif garis tegas."
+  },
+  {
+    "province": "Sulawesi Selatan",
+    "jenisTenun": "Tenun Toraja",
+    "description": "Tenun dengan filosofi kehidupan dan kematian, warna kontras."
+  },
+  {
+    "province": "Sulawesi Tenggara",
+    "jenisTenun": "Kain Tolaki",
+    "description": "Tenun cerah dengan motif geometris khas suku Tolaki."
+  },
+  {
+    "province": "Maluku",
+    "jenisTenun": "Kain Tanimbar",
+    "description": "Tenun geometris sederhana, simbol hubungan manusia dan alam."
+  },
+  {
+    "province": "Maluku Utara",
+    "jenisTenun": "Tenun Tidore",
+    "description": "Tenun tradisional dengan motif kerajaan Islam Tidore."
+  },
+  {
+    "province": "Papua",
+    "jenisTenun": "Noken Tenun",
+    "description": "Noken versi tenun dengan motif tradisional Papua."
+  },
+  {
+    "province": "Papua Barat",
+    "jenisTenun": "Kain Timor-Papua",
+    "description": "Tenun hasil akulturasi budaya Papua dengan NTT."
+  }
+]

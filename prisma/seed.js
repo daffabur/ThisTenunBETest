@@ -1,14 +1,18 @@
+// prisma/seed.js
+import 'dotenv/config';
 import fs from 'fs';
+import path from 'path';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const raw = fs.readFileSync('./outfits_seed.json', 'utf-8');
-  const items = JSON.parse(raw); // [{ province, outfit }]
+  // baca seed file (tanpa imageUrl)
+  const raw = fs.readFileSync(path.join(process.cwd(), 'tenun_seed.json'), 'utf-8');
+  const items = JSON.parse(raw); // [{ province, jenisTenun, description }]
 
-  // Pastikan provinsi ada dulu
-  const provinces = [...new Set(items.map(i => i.province))];
+  // buat provinsi unik
+  const provinces = [...new Set(items.map(i => i.province.trim()))];
   for (const name of provinces) {
     await prisma.province.upsert({
       where: { name },
@@ -17,30 +21,40 @@ async function main() {
     });
   }
 
-  // Isi outfit per provinsi
+  // isi tabel Tenun
   for (const row of items) {
-    const province = await prisma.province.findUnique({
-      where: { name: row.province }
+    const prov = await prisma.province.findUnique({
+      where: { name: row.province.trim() }
     });
-    if (!province) continue;
+    if (!prov) continue;
 
-    // insert outfit unik per provinsi
-    await prisma.outfit.upsert({
+    // gunakan compound unique [provinceId, jenisTenun]
+    await prisma.tenun.upsert({
       where: {
-        name_provinceId: {
-          name: row.outfit,
-          provinceId: province.id,
-        }
+        provinceId_jenisTenun: {
+          provinceId: prov.id,
+          jenisTenun: row.jenisTenun.trim(),
+        },
       },
-      update: {},
+      update: {
+        description: row.description, // bisa diupdate jika ada perubahan
+      },
       create: {
-        name: row.outfit,
-        provinceId: province.id,
-      }
+        jenisTenun: row.jenisTenun.trim(),
+        description: row.description,
+        provinceId: prov.id,
+      },
     });
   }
 
   console.log('✅ Seeding selesai!');
 }
 
-main().finally(async () => await prisma.$disconnect());
+main()
+  .catch((e) => {
+    console.error('❌ Seed error:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

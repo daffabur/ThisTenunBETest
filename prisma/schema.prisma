@@ -8,22 +8,27 @@ datasource db {
 }
 
 model Province {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  createdAt DateTime  @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
 
-  outfits   Outfit[]
+  tenun     Tenun[]
 }
 
-model Outfit {
-  id         Int       @id @default(autoincrement())
-  name       String
-  createdAt  DateTime  @default(now())
+model Tenun {
+  id          Int      @id @default(autoincrement())
+  // kolom yang kamu minta:
+  jenisTenun  String
+  imageUrl    String?   // link gambar
+  description String   // penjelasan tenun
 
-  province   Province  @relation(fields: [provinceId], references: [id])
-  provinceId Int
+  createdAt   DateTime @default(now())
 
+  // relasi ke provinsi
+  province    Province @relation(fields: [provinceId], references: [id])
+  provinceId  Int
+
+  // 1 provinsi tidak boleh punya 2 baris dengan jenis tenun yang sama
+  @@unique([provinceId, jenisTenun], map: "uniq_province_jenis")
   @@index([provinceId])
-  @@unique([name, provinceId], map: "unique_outfit_per_province")
 }
-
