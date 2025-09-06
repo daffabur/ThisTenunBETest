@@ -51,7 +51,7 @@ const imageKey = (provinceName = '') => {
 const pickExisting = (folder, prefix, key) => {
   const exts = ['.jpg', '.jpeg', '.png', '.webp'];
   for (const ext of exts) {
-    const rel = path.join('public', 'images', folder, `${prefix}-${key}${ext}`);
+    const rel = path.join('public', 'images', folder, `${prefix}-${key}${ext}`); // <-- perbaikan pakai backtick
     const abs = path.join(process.cwd(), rel);
     if (fs.existsSync(abs)) return '/' + rel.replace(/\\/g, '/');
   }
@@ -362,6 +362,94 @@ app.delete('/api/inspo/:slug', async (req, res) => {
   }
 });
 
+/* ----------------------------- Articles API --------------------------- */
+// List + filter + paging
+app.get('/api/articles', async (req, res) => {
+  try {
+    const { q, tag, limit, offset, order } = req.query;
+    const where = {};
+
+    if (q) {
+      const term = String(q);
+      where.OR = [
+        { title:   { contains: term, mode: 'insensitive' } },
+        { summary: { contains: term, mode: 'insensitive' } },
+        { content: { contains: term, mode: 'insensitive' } },
+        { author:  { contains: term, mode: 'insensitive' } },
+        { tags: { hasSome: term.split(',').map(s => s.trim()).filter(Boolean) } },
+      ];
+    }
+    if (tag) {
+      const tags = String(tag).split(',').map(s => s.trim()).filter(Boolean);
+      if (tags.length) where.tags = { hasSome: tags };
+    }
+
+    const items = await prisma.article.findMany({
+      where,
+      orderBy: { publishedAt: String(order).toLowerCase() === 'asc' ? 'asc' : 'desc' },
+      take: limit ? Number(limit) : 20,
+      skip: offset ? Number(offset) : 0,
+    });
+
+    res.json(items);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to fetch articles' });
+  }
+});
+
+// Detail by slug
+app.get('/api/articles/:slug', async (req, res) => {
+  try {
+    const item = await prisma.article.findUnique({ where: { slug: String(req.params.slug) } });
+    if (!item) return res.status(404).json({ error: 'Not found' });
+    res.json(item);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to fetch article' });
+  }
+});
+
+// (Opsional) Tambah artikel manual
+app.post('/api/articles', async (req, res) => {
+  try {
+    const { title, summary, content, url, imageUrl, author, tags = [], publishedAt } = req.body || {};
+    if (!title) return res.status(400).json({ error: 'title wajib diisi' });
+
+    const data = {
+      slug: (typeof title === 'string' && title)
+        ? String(title).toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+            .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')
+        : undefined,
+      title: String(title),
+      summary: summary ? String(summary) : null,
+      content: content ? String(content) : null,
+      url: url ? String(url) : null,
+      imageUrl: imageUrl ? String(imageUrl) : null,
+      author: author ? String(author) : null,
+      tags: Array.isArray(tags) ? tags.map(t => String(t)) : String(tags || '').split(',').map(s => s.trim()).filter(Boolean),
+      publishedAt: publishedAt ? new Date(publishedAt) : null,
+    };
+
+    // pastikan slug unik
+    let base = data.slug || 'artikel';
+    let s = base;
+    let i = 2;
+    while (await prisma.article.findUnique({ where: { slug: s } })) {
+      s = `${base}-${i++}`;
+    }
+    data.slug = s;
+
+    const created = await prisma.article.create({ data });
+    res.status(201).json(created);
+  } catch (e) {
+    console.error(e);
+    if (e?.code === 'P2002') return res.status(409).json({ error: 'slug sudah ada' });
+    res.status(500).json({ error: 'Failed to create article' });
+  }
+});
+
 /* ----------------------------- Error Trap ----------------------------- */
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);
@@ -371,5 +459,5 @@ app.use((err, _req, res, _next) => {
 /* ------------------------------ Start App ----------------------------- */
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running at http://localhost:${PORT}`); // <-- perbaikan pakai backtick
 });

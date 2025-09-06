@@ -47,3 +47,20 @@ enum Gender {
   WOMEN
   UNISEX
 }
+
+/* === BARU: Artikel (tidak berelasi ke Tenun/Province/Inspo) === */
+model Article {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique        // ex: "sejarah-tenun-bali"
+  title       String
+  summary     String?                  // ringkasan singkat
+  content     String?                  // isi artikel full (opsional)
+  imageUrl    String?                  // cover (opsional) ex: /public/images/articles/xxx.jpg
+  tags        String[]  @default([])   // Postgres text[]
+  publishedAt DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([publishedAt])
+}
