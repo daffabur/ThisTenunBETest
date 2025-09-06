@@ -4,16 +4,15 @@
   "description": "Backend API for Outfit Santara project (Express + Prisma)",
   "type": "module",
   "main": "src/server.js",
+  "engines": { "node": ">=18.18" },
   "scripts": {
-    "dev": "nodemon src/server.js",
+    "dev": "nodemon -r dotenv/config src/server.js",
     "start": "node src/server.js",
-    "prisma:migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "node prisma/seed.js",
     "prisma:studio": "prisma studio",
     "prisma:generate": "prisma generate",
-    "seed": "node prisma/seed.js"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
