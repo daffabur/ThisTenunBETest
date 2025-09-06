@@ -207,6 +207,161 @@ app.post('/api/outfits', async (req, res) => {
   }
 });
 
+/* --------------------------- Outfit Inspo APIs ------------------------ */
+/**
+ * NOTE:
+ * - Tabel: OutfitInspo (model sudah kamu buat di schema.prisma)
+ * - Field penting: slug (unique), title, imageUrl, (opsional) credit, sourceUrl, gender, tags[]
+ */
+
+// List + filter + pagination
+app.get('/api/inspo', async (req, res) => {
+  try {
+    const { q, gender, limit, offset, order } = req.query;
+
+    const where = {};
+    if (q) {
+      const term = String(q);
+      where.OR = [
+        { title: { contains: term, mode: 'insensitive' } },
+        { credit: { contains: term, mode: 'insensitive' } },
+        // cari di tags
+        { tags: { hasSome: term.split(',').map(s => s.trim()).filter(Boolean) } },
+      ];
+    }
+    if (gender) {
+      where.gender = String(gender).toUpperCase(); // MEN/WOMEN/UNISEX
+    }
+
+    const items = await prisma.outfitInspo.findMany({
+      where,
+      orderBy: { createdAt: String(order).toLowerCase() === 'asc' ? 'asc' : 'desc' },
+      take: limit ? Number(limit) : undefined,
+      skip: offset ? Number(offset) : undefined,
+    });
+
+    res.json(items);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to fetch outfit inspo' });
+  }
+});
+
+// Random pick (default 6)
+app.get('/api/inspo/random', async (req, res) => {
+  try {
+    const size = Math.max(1, Math.min(50, Number(req.query.limit) || 6));
+    const count = await prisma.outfitInspo.count();
+    if (!count) return res.json([]);
+
+    // ambil window acak biar ringan
+    const maxStart = Math.max(0, count - size);
+    const skip = Math.floor(Math.random() * (maxStart + 1));
+
+    const items = await prisma.outfitInspo.findMany({
+      take: size,
+      skip,
+      orderBy: { id: 'asc' },
+    });
+
+    res.json(items);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to fetch random inspo' });
+  }
+});
+
+// Detail by slug
+app.get('/api/inspo/:slug', async (req, res) => {
+  try {
+    const item = await prisma.outfitInspo.findUnique({
+      where: { slug: String(req.params.slug) },
+    });
+    if (!item) return res.status(404).json({ error: 'Not found' });
+    res.json(item);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Failed to fetch inspo' });
+  }
+});
+
+// Create inspo
+app.post('/api/inspo', async (req, res) => {
+  try {
+    const { title, imageUrl, credit, sourceUrl, gender, tags } = req.body || {};
+    if (!title || !imageUrl) {
+      return res.status(400).json({ error: 'title dan imageUrl wajib diisi' });
+    }
+    const parsedTags = Array.isArray(tags)
+      ? tags
+      : String(tags || '')
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+
+    const data = {
+      slug: slug(title),
+      title: String(title).trim(),
+      imageUrl: String(imageUrl).trim(),
+      credit: credit ? String(credit).trim() : null,
+      sourceUrl: sourceUrl ? String(sourceUrl).trim() : null,
+      gender: gender ? String(gender).toUpperCase() : null, // MEN/WOMEN/UNISEX
+      tags: parsedTags,
+    };
+
+    const created = await prisma.outfitInspo.create({ data });
+    res.status(201).json(created);
+  } catch (e) {
+    console.error(e);
+    if (e?.code === 'P2002') {
+      return res.status(409).json({ error: 'slug sudah dipakai' });
+    }
+    res.status(500).json({ error: 'Failed to create inspo' });
+  }
+});
+
+// Update by slug
+app.put('/api/inspo/:slug', async (req, res) => {
+  try {
+    const { title, imageUrl, credit, sourceUrl, gender, tags } = req.body || {};
+    const parsedTags = Array.isArray(tags)
+      ? tags
+      : typeof tags === 'string'
+        ? tags.split(',').map(s => s.trim()).filter(Boolean)
+        : undefined;
+
+    const updated = await prisma.outfitInspo.update({
+      where: { slug: String(req.params.slug) },
+      data: {
+        ...(title != null ? { title: String(title).trim() } : {}),
+        ...(imageUrl != null ? { imageUrl: String(imageUrl).trim() } : {}),
+        ...(credit !== undefined ? { credit: credit ? String(credit).trim() : null } : {}),
+        ...(sourceUrl !== undefined ? { sourceUrl: sourceUrl ? String(sourceUrl).trim() : null } : {}),
+        ...(gender !== undefined ? { gender: gender ? String(gender).toUpperCase() : null } : {}),
+        ...(parsedTags !== undefined ? { tags: parsedTags } : {}),
+      },
+    });
+
+    res.json(updated);
+  } catch (e) {
+    console.error(e);
+    if (e?.code === 'P2025') return res.status(404).json({ error: 'Not found' });
+    res.status(500).json({ error: 'Failed to update inspo' });
+  }
+});
+
+// Delete by slug
+app.delete('/api/inspo/:slug', async (req, res) => {
+  try {
+    await prisma.outfitInspo.delete({ where: { slug: String(req.params.slug) } });
+    res.status(204).end();
+  } catch (e) {
+    console.error(e);
+    if (e?.code === 'P2025') return res.status(404).json({ error: 'Not found' });
+    res.status(500).json({ error: 'Failed to delete inspo' });
+  }
+});
+
 /* ----------------------------- Error Trap ----------------------------- */
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);

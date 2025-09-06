@@ -8,10 +8,17 @@
   "scripts": {
     "dev": "nodemon -r dotenv/config src/server.js",
     "start": "node src/server.js",
+
+    "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
-    "seed": "node prisma/seed.js",
-    "prisma:studio": "prisma studio",
+
     "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+
+    "seed": "node prisma/seed.js",
+    "seed:inspo": "node prisma/seed_inspo.js",
+    "seed:all": "npm run seed && npm run seed:inspo",
+
     "postinstall": "prisma generate"
   },
   "keywords": [],

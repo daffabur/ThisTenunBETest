@@ -4,31 +4,46 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url       = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Province {
   id        Int      @id @default(autoincrement())
   name      String   @unique
   createdAt DateTime @default(now())
-
   tenun     Tenun[]
 }
 
 model Tenun {
   id          Int      @id @default(autoincrement())
-  // kolom yang kamu minta:
   jenisTenun  String
-  imageUrl    String?   // link gambar
-  description String   // penjelasan tenun
-
+  imageUrl    String?
+  description String
   createdAt   DateTime @default(now())
-
-  // relasi ke provinsi
   province    Province @relation(fields: [provinceId], references: [id])
   provinceId  Int
 
-  // 1 provinsi tidak boleh punya 2 baris dengan jenis tenun yang sama
   @@unique([provinceId, jenisTenun], map: "uniq_province_jenis")
   @@index([provinceId])
+}
+
+/* === BARU: tabel outfit inspo, tidak berhubungan ke provinsi === */
+model OutfitInspo {
+  id        Int       @id @default(autoincrement())
+  slug      String    @unique      // dipakai untuk upsert
+  title     String
+  imageUrl  String
+  credit    String?
+  sourceUrl String?
+  gender    Gender?
+  tags      String[]  @default([])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Gender {
+  MEN
+  WOMEN
+  UNISEX
 }
