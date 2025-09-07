@@ -1,21 +1,16 @@
-// prisma/seed_articles.js
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 
 const prisma = new PrismaClient();
 
-/* ==================== CONFIG ==================== */
-// Lokasi file JSON (cek berurutan, ambil yang pertama ketemu)
 const JSON_PATHS = [
-  path.join(process.cwd(), 'article_seed.json'),   // root
-  path.join(process.cwd(), 'prisma', 'article_seed.json'), // prisma/
-  path.join(process.cwd(), 'data', 'article_seed.json'),   // data/ (opsional)
+  path.join(process.cwd(), 'article_seed.json'),   
+  path.join(process.cwd(), 'prisma', 'article_seed.json'), 
+  path.join(process.cwd(), 'data', 'article_seed.json'),
 ];
 
-// Folder gambar artikel yang kamu pakai
 const DEFAULT_IMAGE_DIR = '/public/images/artikel';
-/* ================================================= */
 
 const norm = (s = '') => String(s).trim();
 const toSlug = (s = '') =>
@@ -48,8 +43,6 @@ function normalizeTags(val) {
 async function ensureUniqueSlug(base) {
   let slug = base || 'artikel';
   let i = 2;
-  // cek sampai unik
-  // (gunakan findUnique by slug — harus ada @unique di schema)
   for (;;) {
     const found = await prisma.article.findUnique({ where: { slug } });
     if (!found) return slug;
@@ -72,9 +65,6 @@ async function main() {
     const summary = norm(row.summary || '');
     const content = norm(row.content || '');
 
-    // Terima beberapa kemungkinan nama field gambar:
-    // - imageFile (sesuai file kamu)
-    // - image / image_url / imageUrl
     let img =
       row.imageFile ||
       row.image ||
@@ -82,22 +72,16 @@ async function main() {
       row.imageUrl ||
       '';
 
-    // Kalau img bukan URL absolut dan bukan path /public/**,
-    // treat sebagai nama file di /public/images/artikel
     let imageUrl = norm(img);
     if (imageUrl && !/^https?:\/\//i.test(imageUrl) && !imageUrl.startsWith('/public/')) {
       imageUrl = `${DEFAULT_IMAGE_DIR}/${imageUrl}`.replace(/\/{2,}/g, '/');
     }
 
-    // tags opsional
     const tags = normalizeTags(row.tags || []);
 
-    // bikin slug dari judul dan pastikan unik
     const baseSlug = toSlug(title);
     const slug = await ensureUniqueSlug(baseSlug);
 
-    // Upsert ke tabel Article
-    // ⚠️ HANYA field yang ada di schema: slug, title, summary?, content?, imageUrl?, tags?
     await prisma.article.upsert({
       where: { slug },
       update: {

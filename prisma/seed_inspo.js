@@ -1,4 +1,3 @@
-// prisma/seed_inspo.js
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
@@ -22,13 +21,13 @@ async function main() {
   console.log(`📦 Found ${files.length} images in /public/images/inspo`);
 
   for (const f of files) {
-    const base = path.parse(f).name;       // contoh: "inspo-1"
-    const slug = base.toLowerCase();       // wajib unique
-    const title = toTitle(base);           // "Inspo 1"
+    const base = path.parse(f).name;       
+    const slug = base.toLowerCase();       
+    const title = toTitle(base);           
     const imageUrl = `/public/images/inspo/${f}`;
 
     await prisma.outfitInspo.upsert({
-      where: { slug },                     // ← sekarang valid karena @unique
+      where: { slug },                     
       update: { title, imageUrl },
       create: { slug, title, imageUrl }
     });

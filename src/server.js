@@ -7,14 +7,11 @@ import { PrismaClient } from '@prisma/client';
 const app = express();
 const prisma = new PrismaClient();
 
-/* --------------------------- App Middleware --------------------------- */
 app.use(express.json({ limit: '1mb' }));
 app.use(cors({ origin: '*' }));
 
-// Serve static files: /public/** -> ./public/**
 app.use('/public', express.static(path.join(process.cwd(), 'public')));
 
-/* ----------------------- Helper: image key & file --------------------- */
 const PROVINCE_IMAGE_KEY = {
   'nanggroe aceh darussalam': 'aceh', aceh: 'aceh',
   'sumatra utara': 'sumut', 'sumatera utara': 'sumut',
@@ -51,7 +48,7 @@ const imageKey = (provinceName = '') => {
 const pickExisting = (folder, prefix, key) => {
   const exts = ['.jpg', '.jpeg', '.png', '.webp'];
   for (const ext of exts) {
-    const rel = path.join('public', 'images', folder, `${prefix}-${key}${ext}`); // <-- perbaikan pakai backtick
+    const rel = path.join('public', 'images', folder, `${prefix}-${key}${ext}`); 
     const abs = path.join(process.cwd(), rel);
     if (fs.existsSync(abs)) return '/' + rel.replace(/\\/g, '/');
   }
@@ -60,7 +57,6 @@ const pickExisting = (folder, prefix, key) => {
 
 const withImages = (row) => {
   const key = imageKey(row?.province?.name || '');
-  // Prioritas: imageUrl dari DB (kalau kamu isi nanti), kalau kosong pakai auto scan
   const tenunAuto = pickExisting('tenun', 'tenun', key);
   const pemakaianAuto = pickExisting('pemakaian', 'pemakaian', key);
 
@@ -71,11 +67,9 @@ const withImages = (row) => {
   };
 };
 
-/* ------------------------------- Routes ------------------------------- */
 app.get('/', (_req, res) => res.send('Hello World, Outfit Santara API!'));
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
-// Provinces
 app.get('/api/provinces', async (_req, res) => {
   try {
     const provinces = await prisma.province.findMany({ orderBy: { name: 'asc' } });
@@ -102,7 +96,6 @@ app.post('/api/provinces', async (req, res) => {
   }
 });
 
-// Tenun (list)
 app.get('/api/tenun', async (req, res) => {
   try {
     const { province } = req.query;
@@ -121,7 +114,6 @@ app.get('/api/tenun', async (req, res) => {
   }
 });
 
-// Tenun (create)
 app.post('/api/tenun', async (req, res) => {
   try {
     const { jenisTenun, description = '', imageUrl, provinceName } = req.body || {};
@@ -145,14 +137,11 @@ app.post('/api/tenun', async (req, res) => {
     res.status(201).json(withImages(item));
   } catch (e) {
     console.error(e);
-    // Unique (provinceId, jenisTenun)
     if (e?.code === 'P2002') return res.status(409).json({ error: 'jenisTenun sudah ada di provinsi ini' });
     res.status(500).json({ error: 'Failed to create tenun' });
   }
 });
 
-/* ------------------- Aliases: outfits -> tenun (read/create) ---------- */
-// GET outfits (alias tenun)
 app.get('/api/outfits', async (req, res) => {
   try {
     const { province } = req.query;
@@ -168,7 +157,7 @@ app.get('/api/outfits', async (req, res) => {
       tenun.map(t =>
         withImages({
           ...t,
-          name: t.jenisTenun, // biar FE lama tetap jalan
+          name: t.jenisTenun,
         }),
       ),
     );
@@ -207,14 +196,7 @@ app.post('/api/outfits', async (req, res) => {
   }
 });
 
-/* --------------------------- Outfit Inspo APIs ------------------------ */
-/**
- * NOTE:
- * - Tabel: OutfitInspo (model sudah kamu buat di schema.prisma)
- * - Field penting: slug (unique), title, imageUrl, (opsional) credit, sourceUrl, gender, tags[]
- */
 
-// List + filter + pagination
 app.get('/api/inspo', async (req, res) => {
   try {
     const { q, gender, limit, offset, order } = req.query;
@@ -225,12 +207,11 @@ app.get('/api/inspo', async (req, res) => {
       where.OR = [
         { title: { contains: term, mode: 'insensitive' } },
         { credit: { contains: term, mode: 'insensitive' } },
-        // cari di tags
         { tags: { hasSome: term.split(',').map(s => s.trim()).filter(Boolean) } },
       ];
     }
     if (gender) {
-      where.gender = String(gender).toUpperCase(); // MEN/WOMEN/UNISEX
+      where.gender = String(gender).toUpperCase(); 
     }
 
     const items = await prisma.outfitInspo.findMany({
@@ -247,14 +228,11 @@ app.get('/api/inspo', async (req, res) => {
   }
 });
 
-// Random pick (default 6)
 app.get('/api/inspo/random', async (req, res) => {
   try {
     const size = Math.max(1, Math.min(50, Number(req.query.limit) || 6));
     const count = await prisma.outfitInspo.count();
     if (!count) return res.json([]);
-
-    // ambil window acak biar ringan
     const maxStart = Math.max(0, count - size);
     const skip = Math.floor(Math.random() * (maxStart + 1));
 
@@ -271,7 +249,6 @@ app.get('/api/inspo/random', async (req, res) => {
   }
 });
 
-// Detail by slug
 app.get('/api/inspo/:slug', async (req, res) => {
   try {
     const item = await prisma.outfitInspo.findUnique({
@@ -285,7 +262,6 @@ app.get('/api/inspo/:slug', async (req, res) => {
   }
 });
 
-// Create inspo
 app.post('/api/inspo', async (req, res) => {
   try {
     const { title, imageUrl, credit, sourceUrl, gender, tags } = req.body || {};
@@ -305,7 +281,7 @@ app.post('/api/inspo', async (req, res) => {
       imageUrl: String(imageUrl).trim(),
       credit: credit ? String(credit).trim() : null,
       sourceUrl: sourceUrl ? String(sourceUrl).trim() : null,
-      gender: gender ? String(gender).toUpperCase() : null, // MEN/WOMEN/UNISEX
+      gender: gender ? String(gender).toUpperCase() : null,
       tags: parsedTags,
     };
 
@@ -320,7 +296,6 @@ app.post('/api/inspo', async (req, res) => {
   }
 });
 
-// Update by slug
 app.put('/api/inspo/:slug', async (req, res) => {
   try {
     const { title, imageUrl, credit, sourceUrl, gender, tags } = req.body || {};
@@ -350,7 +325,6 @@ app.put('/api/inspo/:slug', async (req, res) => {
   }
 });
 
-// Delete by slug
 app.delete('/api/inspo/:slug', async (req, res) => {
   try {
     await prisma.outfitInspo.delete({ where: { slug: String(req.params.slug) } });
@@ -362,8 +336,6 @@ app.delete('/api/inspo/:slug', async (req, res) => {
   }
 });
 
-/* ----------------------------- Articles API --------------------------- */
-// List + filter + paging
 app.get('/api/articles', async (req, res) => {
   try {
     const { q, tag, limit, offset, order } = req.query;
@@ -398,7 +370,6 @@ app.get('/api/articles', async (req, res) => {
   }
 });
 
-// Detail by slug
 app.get('/api/articles/:slug', async (req, res) => {
   try {
     const item = await prisma.article.findUnique({ where: { slug: String(req.params.slug) } });
@@ -410,7 +381,6 @@ app.get('/api/articles/:slug', async (req, res) => {
   }
 });
 
-// (Opsional) Tambah artikel manual
 app.post('/api/articles', async (req, res) => {
   try {
     const { title, summary, content, url, imageUrl, author, tags = [], publishedAt } = req.body || {};
@@ -432,7 +402,6 @@ app.post('/api/articles', async (req, res) => {
       publishedAt: publishedAt ? new Date(publishedAt) : null,
     };
 
-    // pastikan slug unik
     let base = data.slug || 'artikel';
     let s = base;
     let i = 2;
@@ -450,14 +419,12 @@ app.post('/api/articles', async (req, res) => {
   }
 });
 
-/* ----------------------------- Error Trap ----------------------------- */
 app.use((err, _req, res, _next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
 
-/* ------------------------------ Start App ----------------------------- */
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`); // <-- perbaikan pakai backtick
+  console.log(`Server running at http://localhost:${PORT}`); 
 });

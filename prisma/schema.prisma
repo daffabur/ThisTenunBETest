@@ -27,7 +27,6 @@ model Tenun {
   @@index([provinceId])
 }
 
-/* === BARU: tabel outfit inspo, tidak berhubungan ke provinsi === */
 model OutfitInspo {
   id        Int       @id @default(autoincrement())
   slug      String    @unique      // dipakai untuk upsert
@@ -48,7 +47,6 @@ enum Gender {
   UNISEX
 }
 
-/* === BARU: Artikel (tidak berelasi ke Tenun/Province/Inspo) === */
 model Article {
   id          Int       @id @default(autoincrement())
   slug        String    @unique        // ex: "sejarah-tenun-bali"

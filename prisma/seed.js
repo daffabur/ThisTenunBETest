@@ -59,7 +59,6 @@ async function main() {
   }
   if (items.length === 0) throw new Error('Data hasil parsing = 0. Abort.');
 
-  // REPLACE mode
   await prisma.tenun.deleteMany({});
   const keepProvinces = [...new Set(items.map(i => i.province))];
   await prisma.province.deleteMany({ where: { name: { notIn: keepProvinces } } });
